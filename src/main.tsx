@@ -5,12 +5,17 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AppServiceProvider } from './components/AppServiceProvider'
 import { setup } from './compositionRoot'
+import { UserRegister } from './pages/UserRegister'
 
 const defaultAppServices = setup()
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+  },
+  {
+    path: 'welcome',
+    element: <UserRegister />,
   },
 ])
 
