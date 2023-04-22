@@ -1,6 +1,4 @@
-import { Player } from './domine/Player'
-
 export interface LocalStorageClient {
-  savePlayer: () => void
-  loadPlayer: () => Player
+  set<T>(key: string, data: T): Promise<void>
+  get<T>(key: string): Promise<T | null>
 }
