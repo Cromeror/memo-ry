@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { AppServiceProvider } from './components/AppServiceProvider'
+import { setup } from './compositionRoot'
 
+const defaultAppServices = setup()
 const router = createBrowserRouter([
   {
     path: '/',
@@ -13,6 +16,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AppServiceProvider appServices={defaultAppServices}>
+      <RouterProvider router={router} />
+    </AppServiceProvider>
   </React.StrictMode>
 )
