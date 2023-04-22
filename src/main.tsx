@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AppServiceProvider } from './components/AppServiceProvider'
 import { setup } from './compositionRoot'
 import { UserRegister } from './pages/UserRegister'
+import { NotFound } from './pages/NotFound'
 
 const defaultAppServices = setup()
 const router = createBrowserRouter([
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
   {
     path: 'welcome',
     element: <UserRegister />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ])
 
