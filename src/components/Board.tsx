@@ -1,22 +1,15 @@
-import { useAppServices } from './AppServiceProvider'
-import { useEffect, useState } from 'react'
 import { Card } from '../abstractions/domine/Card'
 import { CardImage } from './CardImage'
 
-export const Board = () => {
-  const { memoryApiService } = useAppServices()
-  const [data, setData] = useState<Card[]>([])
+interface BoardProps {
+  cards: Card[]
+}
 
-  useEffect(() => {
-    memoryApiService.getCards(8).then((cards) => {
-      setData(cards)
-    })
-  }, [])
-
+export const Board = ({ cards }: BoardProps) => {
   return (
     <div className="grid gap-2 grid-cols-6 w-fit m-auto">
-      {data.slice(0, 18).map((card) => {
-        return <CardImage src={card.image.url} />
+      {cards.map((card, index) => {
+        return <CardImage key={index} src={card.image.url} />
       })}
     </div>
   )
