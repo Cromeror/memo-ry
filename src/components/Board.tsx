@@ -8,7 +8,7 @@ export const Board = () => {
   const [data, setData] = useState<Card[]>([])
 
   useEffect(() => {
-    memoryApiService.getAllCards().then((cards) => {
+    memoryApiService.getCards(8).then((cards) => {
       setData(cards)
     })
   }, [])

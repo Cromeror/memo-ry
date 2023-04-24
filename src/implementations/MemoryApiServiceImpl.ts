@@ -27,13 +27,18 @@ interface EntriesDataSource {
 
 export class MemoryApiServiceImpl implements MemoryApiService {
   _HttpClient: HttpClient
+  _defaultPerPage = 20
   constructor(httpClient: HttpClient) {
     this._HttpClient = httpClient
   }
 
-  async getAllCards(): Promise<Card[]> {
+  async getCards(perPage?: number): Promise<Card[]> {
     // TODO: improvement the pagination
-    const resource = 'content/spaces/animals/types/game/entries?per_page=20'
+    const resource = `content/spaces/animals/types/game/entries${
+      perPage && perPage > 0
+        ? '?per_page=' + perPage
+        : '?per_page=' + this._defaultPerPage
+    }`
     const { entries } = await this._HttpClient.get<EntriesDataSource>(resource)
 
     // TODO: check the API model to validate the optional fields.
