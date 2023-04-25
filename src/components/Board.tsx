@@ -1,15 +1,10 @@
 import { Card } from '../abstractions/domine/Card'
 import { CardImage } from './CardImage'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface BoardProps {
   cards: Card[]
   afterThePlay: (boardState: BoardState) => void
-}
-
-interface CardState {
-  card: Card
-  isRevealed: boolean
 }
 
 export interface BoardState {
@@ -20,21 +15,22 @@ const isTheSameCard = ([c1, c2]: Card[]) => c1.uuid === c2.uuid
 
 export const Board = ({ cards, afterThePlay }: BoardProps) => {
   const DEFAULT_SELECTION_STATE = {
-    firstSelection: null,
-    secondSelection: null,
+    firstMove: null,
+    secondMove: null,
     isWin: false,
   }
   const boardState = useRef<BoardState>({ lastMove: 'NONE' })
   const [selectionState, setSelectionState] = useState<{
-    firstSelection: Card | null
-    secondSelection: Card | null
+    firstMove: {
+      card: Card
+      index: number
+    } | null
+    secondMove: {
+      card: Card
+      index: number
+    } | null
     isWin: boolean
   }>(DEFAULT_SELECTION_STATE)
-
-  const cardsOnBoard: CardState[] = cards.map((card) => ({
-    card,
-    isRevealed: false,
-  }))
 
   const resetCurrentSelection = () => {
     setSelectionState(DEFAULT_SELECTION_STATE)
@@ -52,55 +48,62 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     }
   }
 
-  const selectionHandler = (cardState: CardState) => {
-    const { firstSelection, secondSelection } = selectionState
+  const selectionHandler = (card: Card, index: number) => {
+    const { firstMove, secondMove } = selectionState
 
-    if (firstSelection && secondSelection) {
+    if (firstMove && secondMove) {
       return
     }
 
-    if (!firstSelection && !secondSelection) {
+    if (!firstMove && !secondMove) {
       setSelectionState({
         ...selectionState,
-        firstSelection: cardState.card,
+        firstMove: {
+          card,
+          index,
+        },
       })
       return
     }
 
     setSelectionState({
       ...selectionState,
-      secondSelection: cardState.card,
-      isWin: isTheSameCard([firstSelection!, cardState.card]),
+      secondMove: { card, index },
+      isWin: isTheSameCard([firstMove?.card!, card]),
     })
   }
 
   useEffect(() => {
-    const { firstSelection, secondSelection, isWin } = selectionState
-    if (firstSelection && secondSelection) {
+    const { firstMove, secondMove, isWin } = selectionState
+    if (firstMove && secondMove) {
       isWin ? onWinner() : onFailed()
     }
 
-    if (firstSelection && secondSelection) {
+    if (firstMove && secondMove) {
       afterThePlay && afterThePlay(Object.assign(boardState.current))
       resetCurrentSelection()
     }
   }, [selectionState])
 
-  return (
-    <div className="grid gap-2 grid-cols-6 w-fit m-auto">
-      {cardsOnBoard.map((cardState: CardState, index) => {
-        const { card, isRevealed } = cardState
-        const isSelected = false
+  const renderCards = useMemo(() => {
+    return cards.map((card: Card, index) => {
+      const { firstMove, secondMove } = selectionState
+      const isRevealed =
+        (firstMove?.card.uuid === card.uuid && firstMove.index === index) ||
+        (secondMove?.card.uuid === card.uuid && secondMove.index === index)
 
-        return (
-          <CardImage
-            key={index}
-            showUp={isSelected || isRevealed}
-            src={card.image.url}
-            onClick={() => selectionHandler(cardState)}
-          />
-        )
-      })}
-    </div>
+      return (
+        <CardImage
+          key={index}
+          disable={isRevealed}
+          src={card.image.url}
+          onClick={() => selectionHandler(card, index)}
+        />
+      )
+    })
+  }, [cards, selectionState])
+
+  return (
+    <div className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</div>
   )
 }

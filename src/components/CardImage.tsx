@@ -4,21 +4,24 @@ import { useState } from 'react'
 interface CardImageProps {
   src: string
   onClick: () => void
-  showUp?: boolean
+  disable: boolean
 }
 
-export const CardImage = ({ src, onClick, showUp }: CardImageProps) => {
+export const CardImage = ({ src, onClick, disable }: CardImageProps) => {
   const [open, setOpen] = useState(false)
 
   return (
     <div
       className="rounded-xl overflow-hidden drop-shadow-md select-none"
       onClick={() => {
+        if (disable || open) {
+          return
+        }
         onClick && onClick()
-        setOpen((r) => !r)
+        setOpen(true)
       }}
     >
-      {open || showUp ? (
+      {open ? (
         <img className="w-40 h-64 object-cover" src={src} />
       ) : (
         <img className="w-40 h-64" srcSet={backCard} />
