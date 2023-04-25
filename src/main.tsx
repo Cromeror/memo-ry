@@ -7,6 +7,7 @@ import { AppServiceProvider } from './components/AppServiceProvider'
 import { setup } from './compositionRoot'
 import { UserRegister } from './pages/UserRegister'
 import { NotFound } from './pages/NotFound'
+import { Stage } from './pages/Stage'
 
 const defaultAppServices = setup()
 const router = createBrowserRouter([
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
   {
     path: 'welcome',
     element: <UserRegister />,
+  },
+  {
+    path: 'stage',
+    element: <Stage />,
   },
   {
     path: '*',
