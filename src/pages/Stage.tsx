@@ -1,29 +1,42 @@
-import { Board } from '../components/Board'
 import { ScoreBoard } from '../components/ScoreBoard'
 import { useAppServices } from '../components/AppServiceProvider'
 import { useEffect, useState } from 'react'
 import { Card } from '../abstractions/domine/Card'
+import { Board, BoardState } from '../components/Board'
 
 const shuffleCards = (cards: Card[]) => {
-  return [...cards, ...cards].sort(() => Math.random() - 0.5)
+  return cards.sort(() => Math.random() - 0.5)
 }
 
 export const Stage = () => {
   const { memoryApiService } = useAppServices()
   const [data, setData] = useState<Card[]>([])
+  const [score, setScore] = useState({ won: 0, lose: 0 })
 
   useEffect(() => {
     memoryApiService.getCards(9).then((cards) => {
-      setData(cards)
+      const duplicatedCards = [...cards, ...cards]
+      setData(shuffleCards(duplicatedCards))
     })
-  }, [])
+  }, [setData])
 
-  const cards = shuffleCards(data)
+  if (data.length < 1) {
+    return 'Loading..'
+  }
+
+  const afterThePlayBehavior = ({ lastMove }: BoardState) => {
+    if (lastMove === 'LOSE') {
+      setScore(({ won, lose }) => ({ lose: lose + 1, won }))
+    }
+    if (lastMove === 'WON') {
+      setScore(({ won, lose }) => ({ lose, won: won + 1 }))
+    }
+  }
 
   return (
     <div>
-      <ScoreBoard fails={5} points={4} />
-      <Board cards={cards} />
+      <ScoreBoard fails={score.lose} points={score.won} />
+      <Board cards={data} afterThePlay={afterThePlayBehavior} />
     </div>
   )
 }
