@@ -1,7 +1,6 @@
 import { Card } from '../abstractions/domine/Card'
 import { CardImage } from './CardImage'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { data } from 'autoprefixer'
 
 interface BoardProps {
   cards: Card[]
@@ -10,6 +9,7 @@ interface BoardProps {
 
 export interface BoardState {
   lastMove: 'WON' | 'LOSE' | 'NONE'
+  status: 'IN_PROGRESS' | 'FINISHED'
 }
 
 interface CardWithState {
@@ -25,7 +25,10 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     secondMove: null,
     isWin: false,
   }
-  const boardState = useRef<BoardState>({ lastMove: 'NONE' })
+  const boardState = useRef<BoardState>({
+    lastMove: 'NONE',
+    status: 'IN_PROGRESS',
+  })
   const upsideDownLastMove = useRef(false)
   const [selectionState, setSelectionState] = useState<{
     firstMove: {
@@ -52,6 +55,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
 
     boardState.current = {
       lastMove: 'LOSE',
+      status: 'IN_PROGRESS',
     }
   }
 
@@ -62,6 +66,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
 
     boardState.current = {
       lastMove: 'WON',
+      status: 'IN_PROGRESS',
     }
   }
 
@@ -93,6 +98,16 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     })
   }
 
+  const checkIfPlayerIsWinner = () => {
+    const upsideCards = cardsWithState.filter((x) => !x.won)
+    if (upsideCards.length === 0) {
+      boardState.current.status = 'FINISHED'
+    }
+  }
+
+  /**
+   * Checking if the move is a win o lose
+   */
   useEffect(() => {
     const { firstMove, secondMove, isWin } = selectionState
 
@@ -100,8 +115,13 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
       return
     }
     isWin ? onWinner() : onFailed()
+
+    checkIfPlayerIsWinner()
   }, [selectionState])
 
+  /**
+   * Mapping cards incoming to cards with states
+   */
   useEffect(() => {
     const cardWithStates: CardWithState[] = cards.map((card: Card) => ({
       card: card,
@@ -110,7 +130,9 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     setCardsWithState(cardWithStates)
   }, [cards])
 
-  // TODO: implement the lockBoard so that user doesn't click in the cards
+  /**
+   * Behavior to keep upside down or revealed
+   */
   useEffect(() => {
     if (lockedBoard && boardState.current.lastMove === 'LOSE') {
       upsideDownLastMove.current = true
