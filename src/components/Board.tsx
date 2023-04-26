@@ -177,5 +177,9 @@ export const Board = ({ cards, afterMove }: BoardProps) => {
     })
   }, [cardsWithState, selectionState])
 
-  return <ul className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</ul>
+  return (
+    <ul className="grid gap-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-6 w-fit m-auto">
+      {renderCards}
+    </ul>
+  )
 }
