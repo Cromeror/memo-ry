@@ -175,7 +175,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
         />
       )
     })
-  }, [cards, selectionState])
+  }, [cardsWithState, selectionState])
 
   return (
     <div className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</div>
