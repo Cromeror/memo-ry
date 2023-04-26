@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface BoardProps {
   cards: Card[]
-  afterThePlay: (boardState: BoardState) => void
+  afterMove: (boardState: BoardState) => void
 }
 
 export interface BoardState {
@@ -19,7 +19,7 @@ interface CardWithState {
 
 const isTheSameCard = ([c1, c2]: Card[]) => c1.uuid === c2.uuid
 
-export const Board = ({ cards, afterThePlay }: BoardProps) => {
+export const Board = ({ cards, afterMove }: BoardProps) => {
   const DEFAULT_SELECTION_STATE = {
     firstMove: null,
     secondMove: null,
@@ -150,7 +150,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
       return
     }
 
-    afterThePlay && afterThePlay(Object.assign(boardState.current))
+    afterMove && afterMove(Object.assign(boardState.current))
 
     setTimeout(() => {
       resetCurrentSelection()
@@ -177,7 +177,5 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     })
   }, [cardsWithState, selectionState])
 
-  return (
-    <div className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</div>
-  )
+  return <ul className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</ul>
 }
