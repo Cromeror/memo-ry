@@ -31,15 +31,14 @@ export const CardImage = ({
   }, [upsideDown])
 
   return (
-    <div
-      className="rounded-xl overflow-hidden drop-shadow-md select-none"
-      onClick={onClickBehavior}
-    >
-      {open ? (
-        <img className="w-40 h-64 object-cover" src={src} />
-      ) : (
-        <img className="w-40 h-64" srcSet={backCard} />
-      )}
-    </div>
+    <li onClick={onClickBehavior}>
+      <button className="rounded-xl overflow-hidden drop-shadow-md select-none outline-orange-600">
+        {open ? (
+          <img className="w-40 h-64 object-cover" src={src} />
+        ) : (
+          <img className="w-40 h-64" srcSet={backCard} />
+        )}
+      </button>
+    </li>
   )
 }

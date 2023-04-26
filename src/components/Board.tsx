@@ -1,15 +1,15 @@
 import { Card } from '../abstractions/domine/Card'
 import { CardImage } from './CardImage'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { data } from 'autoprefixer'
 
 interface BoardProps {
   cards: Card[]
-  afterThePlay: (boardState: BoardState) => void
+  afterMove: (boardState: BoardState) => void
 }
 
 export interface BoardState {
   lastMove: 'WON' | 'LOSE' | 'NONE'
+  status: 'IN_PROGRESS' | 'FINISHED'
 }
 
 interface CardWithState {
@@ -19,13 +19,16 @@ interface CardWithState {
 
 const isTheSameCard = ([c1, c2]: Card[]) => c1.uuid === c2.uuid
 
-export const Board = ({ cards, afterThePlay }: BoardProps) => {
+export const Board = ({ cards, afterMove }: BoardProps) => {
   const DEFAULT_SELECTION_STATE = {
     firstMove: null,
     secondMove: null,
     isWin: false,
   }
-  const boardState = useRef<BoardState>({ lastMove: 'NONE' })
+  const boardState = useRef<BoardState>({
+    lastMove: 'NONE',
+    status: 'IN_PROGRESS',
+  })
   const upsideDownLastMove = useRef(false)
   const [selectionState, setSelectionState] = useState<{
     firstMove: {
@@ -52,6 +55,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
 
     boardState.current = {
       lastMove: 'LOSE',
+      status: 'IN_PROGRESS',
     }
   }
 
@@ -62,6 +66,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
 
     boardState.current = {
       lastMove: 'WON',
+      status: 'IN_PROGRESS',
     }
   }
 
@@ -93,6 +98,16 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     })
   }
 
+  const checkIfPlayerIsWinner = () => {
+    const upsideCards = cardsWithState.filter((x) => !x.won)
+    if (upsideCards.length === 0) {
+      boardState.current.status = 'FINISHED'
+    }
+  }
+
+  /**
+   * Checking if the move is a win o lose
+   */
   useEffect(() => {
     const { firstMove, secondMove, isWin } = selectionState
 
@@ -100,8 +115,13 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
       return
     }
     isWin ? onWinner() : onFailed()
+
+    checkIfPlayerIsWinner()
   }, [selectionState])
 
+  /**
+   * Mapping cards incoming to cards with states
+   */
   useEffect(() => {
     const cardWithStates: CardWithState[] = cards.map((card: Card) => ({
       card: card,
@@ -110,7 +130,9 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
     setCardsWithState(cardWithStates)
   }, [cards])
 
-  // TODO: implement the lockBoard so that user doesn't click in the cards
+  /**
+   * Behavior to keep upside down or revealed
+   */
   useEffect(() => {
     if (lockedBoard && boardState.current.lastMove === 'LOSE') {
       upsideDownLastMove.current = true
@@ -128,7 +150,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
       return
     }
 
-    afterThePlay && afterThePlay(Object.assign(boardState.current))
+    afterMove && afterMove(Object.assign(boardState.current))
 
     setTimeout(() => {
       resetCurrentSelection()
@@ -153,9 +175,7 @@ export const Board = ({ cards, afterThePlay }: BoardProps) => {
         />
       )
     })
-  }, [cards, selectionState])
+  }, [cardsWithState, selectionState])
 
-  return (
-    <div className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</div>
-  )
+  return <ul className="grid gap-2 grid-cols-6 w-fit m-auto">{renderCards}</ul>
 }
